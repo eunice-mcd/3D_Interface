@@ -1,0 +1,138 @@
+// Polygon functionality for BuildingScene.tsx
+// Based on Polygon.tsx implementation
+
+// Add this to your CanvasContent component state (after the existing state variables):
+const [isDrawingPolygon, setIsDrawingPolygon] = useState(false);
+const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
+
+// Add this to your useEffect with pointer events - insert in handlePointerDown function:
+// Handle polygon drawing
+if (currentActiveTool === 'polygon') {
+    // Disable orbit controls when drawing
+    if (orbitRef.current) {
+        orbitRef.current.enabled = false;
+    }
+    
+    const point = getGroundIntersection(event);
+    
+    if (!isDrawingPolygon) {
+        // Start drawing polygon
+        setIsDrawingPolygon(true);
+        setPolygonPoints([point]);
+    } else {
+        // Continue drawing polygon - add a new point
+        setPolygonPoints(prev => [...prev, point]);
+    }
+    
+    canvas.style.cursor = 'crosshair';
+    event.preventDefault();
+    return;
+}
+
+// Add this useEffect for keyboard handling (after existing useEffects):
+useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // Complete polygon when Enter is pressed and we have at least 3 points
+        if (e.key === 'Enter' && isDrawingPolygon && polygonPoints.length >= 3) {
+            // Complete polygon - create a 2D shape similar to Polygon.tsx
+            const { centerX, centerY } = computeSceneCenter(buildingList, roads);
+            
+            // Apply the reverse of the centering that will happen later
+            const vertices: [number, number][] = polygonPoints.map(point => [
+                point[0] + centerX,
+                point[1] + centerY
+            ]);
+            
+            // Add new building
+            setBuildingList(prev => [
+                ...prev,
+                {
+                    vertices,
+                    height: 0.5, // Low height for 2D shape
+                    isMain: false,
+                }
+            ]);
+            
+            // Select the newly created shape
+            setSelected(buildingList.length);
+            
+            // Reset drawing state
+            setIsDrawingPolygon(false);
+            setPolygonPoints([]);
+            if (gl.domElement) gl.domElement.style.cursor = '';
+            
+            // Re-enable orbit controls
+            if (orbitRef.current) {
+                orbitRef.current.enabled = true;
+            }
+        }
+    };
+
+    if (isDrawingPolygon) {
+        window.addEventListener('keydown', handleKeyDown);
+    }
+    
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+}, [isDrawingPolygon, polygonPoints, buildingList, roads, setBuildingList, gl, orbitRef]);
+
+// Add this JSX in your return statement (after BuildingMeshes):
+{/* Polygon preview rendering - exactly like Polygon.tsx */}
+{isDrawingPolygon && polygonPoints.length > 0 && (
+    <group>
+        {/* Draw lines between all points */}
+        <Line
+            points={polygonPoints.map(p => new THREE.Vector3(p[0], p[1], 0.05))}
+            color="#ff3333"
+            lineWidth={2}
+        />
+        {/* Draw points/vertices */}
+        {polygonPoints.map((point, i) => (
+            <mesh key={i} position={[point[0], point[1], 0.05]}>
+                <sphereGeometry args={[0.5, 8, 8]} />
+                <meshBasicMaterial color="#ff3333" />
+            </mesh>
+        ))}
+    </group>
+)}
+{/* Filled polygon preview when 3+ points */}
+{isDrawingPolygon && polygonPoints.length > 2 && (
+    <mesh position={[0, 0, 0.05]}>
+        <shapeGeometry args={[(() => {
+            const shape = new THREE.Shape();
+            shape.moveTo(polygonPoints[0][0], polygonPoints[0][1]);
+            for (let i = 1; i < polygonPoints.length; i++) {
+                shape.lineTo(polygonPoints[i][0], polygonPoints[i][1]);
+            }
+            shape.closePath();
+            return shape;
+        })()]} />
+        <meshBasicMaterial 
+            color="#ff3333" 
+            transparent 
+            opacity={0.3} 
+            side={THREE.DoubleSide}
+        />
+    </mesh>
+)}
+{/* Instructions */}
+{isDrawingPolygon && (
+    <Html fullscreen>
+        <div style={{
+            position: 'absolute',
+            top: '80px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            fontSize: '14px',
+            zIndex: 100
+        }}>
+            Polygon Mode: Click to add points, press Enter to complete
+            ({polygonPoints.length} points)
+        </div>
+    </Html>
+)}
