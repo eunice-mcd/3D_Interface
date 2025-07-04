@@ -4,13 +4,15 @@ import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { computeSceneCenter, CanvasContent, BuildingMeshes } from "./buildingHelper";
 
+// Update the PolygonData type definition to include originalIndex:
 type PolygonData = {
     vertices: [number, number][];
     height: number;
     isMain: boolean;
     buffer?: [number, number][];
-    floorLevel?: number; // Add this to track floor level
-    baseBuilding?: number; // Add this to reference the base building
+    floorLevel?: number;
+    baseBuilding?: number;
+    originalIndex?: number; // Add this line
 };
 
 interface BuildingSceneProps {
@@ -43,6 +45,10 @@ export default function BuildingScene({
     const [is2DView, setIs2DView] = useState(false);
     const [showCoordinates, setShowCoordinates] = useState(false);
     const [siteCoordinates, setSiteCoordinates] = useState<any>(null);
+
+    // Add a new state for site measurements
+    const [showSiteMeasurements, setShowSiteMeasurements] = useState(false);
+    const [siteMeasurements, setSiteMeasurements] = useState<any>(null);
 
     const orbitRef = useRef<any>(null);
 
@@ -98,10 +104,31 @@ export default function BuildingScene({
                 isPointInPolygon(x, y, mainBuilding.vertices));
         };
 
+        // Group buildings by their base building to calculate cumulative heights
+        const buildingGroups: { [key: number]: PolygonData[] } = {};
+        
+        buildingList.forEach((building, index) => {
+            if (!building.isMain && isBuildingInsideSite(building)) {
+                const baseIndex = building.baseBuilding ?? index;
+                if (!buildingGroups[baseIndex]) {
+                    buildingGroups[baseIndex] = [];
+                }
+                buildingGroups[baseIndex].push({ ...building, originalIndex: index });
+            }
+        });
 
-        const buildings = buildingList
-            .filter(b => !b.isMain && isBuildingInsideSite(b) && b.height > 0.1)
-            .map((building, buildingIndex) => {
+        const buildings = Object.entries(buildingGroups).flatMap(([baseIndex, group]) => {
+            // Sort floors by floor level (base building first, then floors in order)
+            const sortedGroup = group.sort((a, b) => (a.floorLevel || 0) - (b.floorLevel || 0));
+            
+            let cumulativeHeight = 0;
+            
+            return sortedGroup.map((building, groupIndex) => {
+                const currentFloorZ = cumulativeHeight;
+                const nextFloorZ = cumulativeHeight + building.height;
+                
+                // Update cumulative height for next floor
+                cumulativeHeight += building.height;
 
                 const baseVertices = building.vertices.map(([x, y], index) => {
                     const displayX = x - centerX;
@@ -113,10 +140,9 @@ export default function BuildingScene({
                         position: 'base',
                         x: gridX,
                         y: gridY,
-                        z: 0
+                        z: currentFloorZ // Base of current floor
                     };
                 });
-
 
                 const topVertices = building.vertices.map(([x, y], index) => {
                     const displayX = x - centerX;
@@ -128,21 +154,27 @@ export default function BuildingScene({
                         position: 'top',
                         x: gridX,
                         y: gridY,
-                        z: building.height
+                        z: nextFloorZ // Top of current floor (cumulative)
                     };
                 });
-
 
                 const allCorners = [...baseVertices, ...topVertices];
 
                 return {
-                    id: buildingIndex,
+                    id: building.originalIndex || parseInt(baseIndex),
                     height: building.height,
                     isFloor: building.floorLevel !== undefined,
                     floorLevel: building.floorLevel || 0,
-                    corners: allCorners
+                    baseBuilding: building.baseBuilding,
+                    corners: allCorners,
+                    zPosition: {
+                        base: currentFloorZ,
+                        top: nextFloorZ,
+                        totalHeight: cumulativeHeight
+                    }
                 };
             });
+        });
 
         const coordinatesData = {
             site: {
@@ -161,7 +193,8 @@ export default function BuildingScene({
             buildings: buildings,
             metadata: {
                 coordinateSystem: "Grid",
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                note: "Z coordinates represent cumulative heights for stacked floors"
             }
         };
 
@@ -212,18 +245,23 @@ export default function BuildingScene({
         return gridPoints;
     };
 
+    // Update the getSiteSideLengthsInMeters function to show results:
     const getSiteSideLengthsInMeters = () => {
         const mainBuilding = buildingList.find(b => b.isMain);
         if (!mainBuilding) {
+            alert('No main site boundary found');
             return null;
         }
 
         const vertices = mainBuilding.vertices;
         if (vertices.length < 3) {
+            alert('Site boundary needs at least 3 points');
             return null;
         }
 
         const sides = [];
+        let totalPerimeter = 0;
+        
         for (let i = 0; i < vertices.length; i++) {
             const v1 = vertices[i];
             const v2 = vertices[(i + 1) % vertices.length];
@@ -235,15 +273,34 @@ export default function BuildingScene({
             sides.push({
                 start: i,
                 end: (i + 1) % vertices.length,
-                length: distance
+                length: distance,
+                startPoint: v1,
+                endPoint: v2
             });
+            
+            totalPerimeter += distance;
         }
 
-        const displayResult = sides.map(side =>
-            `Side ${side.start}-${side.end}: ${side.length.toFixed(2)} meters`
-        ).join('\n');
+        // Calculate area using shoelace formula
+        let area = 0;
+        for (let i = 0; i < vertices.length; i++) {
+            const j = (i + 1) % vertices.length;
+            area += vertices[i][0] * vertices[j][1];
+            area -= vertices[j][0] * vertices[i][1];
+        }
+        area = Math.abs(area) / 2;
 
+        const measurementData = {
+            sides: sides,
+            totalPerimeter: totalPerimeter,
+            area: area,
+            numberOfSides: vertices.length,
+            timestamp: new Date().toISOString()
+        };
 
+        setSiteMeasurements(measurementData);
+        setShowSiteMeasurements(true);
+        
         return sides;
     };
 
@@ -381,6 +438,155 @@ export default function BuildingScene({
         setEditMode({ buildingIdx, faceIndex });
     };
 
+
+    // Add this function to export coordinates in IDF format
+    const exportBuildingCoordinates = () => {
+        if (!siteCoordinates) {
+            alert('Please calculate site coordinates first');
+            return;
+        }
+
+        // Create simplified building coordinates data
+        const buildingCoordinatesData: any = {
+            location: {
+                latitude: 12.9858,  // Bangalore coordinates - replace with actual OSM fetched coordinates
+                longitude: 77.6081
+            },
+            buildings: []
+        };
+
+        // Group buildings by base building
+        const buildingGroups: { [key: number]: any[] } = {};
+        
+        siteCoordinates.buildings.forEach((building: any) => {
+            const baseId = building.baseBuilding || building.id;
+            if (!buildingGroups[baseId]) {
+                buildingGroups[baseId] = [];
+            }
+            buildingGroups[baseId].push(building);
+        });
+
+        // Create simplified building data for each group
+        Object.entries(buildingGroups).forEach(([baseId, floors], buildingIndex) => {
+            // Sort floors by floor level
+            floors.sort((a, b) => (a.floorLevel || 0) - (b.floorLevel || 0));
+            
+            const buildingData = {
+                buildingName: `Building ${buildingIndex + 1}`,
+                zones: floors.map((floor, floorIndex) => {
+                    // Get base and top vertices
+                    const baseVertices = floor.corners.filter((corner: any) => corner.position === 'base');
+                    const topVertices = floor.corners.filter((corner: any) => corner.position === 'top');
+
+                    // Create surfaces for this zone
+                    const surfaces: any = {};
+
+                    // Floor surface (using base vertices)
+                    surfaces.floor = {
+                        surfaceName: "Floor",
+                        vertices: baseVertices.map((vertex: any, index: number) => ({
+                            name: `Floor_Vertex_${index + 1}`,
+                            coordinates: `(${vertex.x.toFixed(2)}, ${vertex.y.toFixed(2)}, ${vertex.z.toFixed(2)})`
+                        }))
+                    };
+
+                    // Ceiling surface (using top vertices)
+                    surfaces.ceiling = {
+                        surfaceName: "Ceiling",
+                        vertices: topVertices.map((vertex: any, index: number) => ({
+                            name: `Ceiling_Vertex_${index + 1}`,
+                            coordinates: `(${vertex.x.toFixed(2)}, ${vertex.y.toFixed(2)}, ${vertex.z.toFixed(2)})`
+                        }))
+                    };
+
+                    // Wall surfaces (connecting base and top vertices)
+                    surfaces.walls = [];
+                    for (let i = 0; i < baseVertices.length; i++) {
+                        const nextIndex = (i + 1) % baseVertices.length;
+                        
+                        const wallVertices = [
+                            // Bottom edge of wall (base level)
+                            {
+                                name: `Wall_${i + 1}_Vertex_1`,
+                                coordinates: `(${baseVertices[i].x.toFixed(2)}, ${baseVertices[i].y.toFixed(2)}, ${baseVertices[i].z.toFixed(2)})`
+                            },
+                            {
+                                name: `Wall_${i + 1}_Vertex_2`,
+                                coordinates: `(${baseVertices[nextIndex].x.toFixed(2)}, ${baseVertices[nextIndex].y.toFixed(2)}, ${baseVertices[nextIndex].z.toFixed(2)})`
+                            },
+                            // Top edge of wall (top level)
+                            {
+                                name: `Wall_${i + 1}_Vertex_3`,
+                                coordinates: `(${topVertices[nextIndex].x.toFixed(2)}, ${topVertices[nextIndex].y.toFixed(2)}, ${topVertices[nextIndex].z.toFixed(2)})`
+                            },
+                            {
+                                name: `Wall_${i + 1}_Vertex_4`,
+                                coordinates: `(${topVertices[i].x.toFixed(2)}, ${topVertices[i].y.toFixed(2)}, ${topVertices[i].z.toFixed(2)})`
+                            }
+                        ];
+
+                        surfaces.walls.push({
+                            surfaceName: `Wall ${i + 1}`,
+                            vertices: wallVertices
+                        });
+                    }
+
+                    return {
+                        zoneName: `Building ${buildingIndex + 1} Zone ${floorIndex + 1}`,
+                        floorName: `Building ${buildingIndex + 1} - Floor ${floorIndex + 1}`,
+                        floorNumber: floorIndex + 1,
+                        floorLevel: floor.floorLevel || 0,
+                        floorHeight: floor.height,
+                        surfaces: surfaces
+                    };
+                })
+            };
+
+            buildingCoordinatesData.buildings.push(buildingData);
+        });
+
+        // Export the simplified coordinates JSON
+        const dataStr = JSON.stringify(buildingCoordinatesData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `building_zones_surfaces_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        // Log simplified output to console
+        console.log('=== BUILDING ZONES WITH SURFACES ===');
+        buildingCoordinatesData.buildings.forEach((building: any) => {
+            console.log(`\n${building.buildingName}:`);
+            building.zones.forEach((zone: any) => {
+                console.log(`\n  ${zone.zoneName}:`);
+                console.log(`  ${zone.floorName}`);
+                
+                // Log floor
+                console.log(`    Floor:`);
+                zone.surfaces.floor.vertices.forEach((vertex: any) => {
+                    console.log(`      ${vertex.name}: ${vertex.coordinates}`);
+                });
+                
+                // Log walls
+                zone.surfaces.walls.forEach((wall: any, wallIndex: number) => {
+                    console.log(`    ${wall.surfaceName}:`);
+                    wall.vertices.forEach((vertex: any) => {
+                        console.log(`      ${vertex.name}: ${vertex.coordinates}`);
+                    });
+                });
+                
+                // Log ceiling
+                console.log(`    Ceiling:`);
+                zone.surfaces.ceiling.vertices.forEach((vertex: any) => {
+                    console.log(`      ${vertex.name}: ${vertex.coordinates}`);
+                });
+            });
+        });
+
+        alert(`Exported ${buildingCoordinatesData.buildings.length} buildings with surfaces (walls, floor, ceiling) for each zone`);
+    };
 
     return (
         <>
@@ -596,7 +802,7 @@ export default function BuildingScene({
                         🏢 Create Floors
                     </button>
 
-                    {/* Add Export Coordinates Button */}
+                    {/* Keep Show Coordinates Button */}
                     <button
                         style={{
                             padding: "8px 12px",
@@ -613,42 +819,6 @@ export default function BuildingScene({
                         onClick={calculateSiteCoordinates}
                     >
                         📊 Show Coordinates
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: "#2196F3",
-                            color: "white",
-                            border: "1px solid #1976D2",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={exportCoordinatesJSON}
-                    >
-                        💾 Export JSON
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: "#FF9800",
-                            color: "white",
-                            border: "1px solid #F57C00",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={exportCoordinatesCSV}
-                    >
-                        📋 Export CSV
                     </button>
 
                     <button
@@ -722,7 +892,23 @@ export default function BuildingScene({
                         🗺️ {is2DView ? '3D View' : '2D View'}
                     </button>
 
-
+                    <button
+                        onClick={exportBuildingCoordinates}
+                        style={{
+                            padding: "8px 12px",
+                            backgroundColor: "#2E7D32",
+                            color: "white",
+                            border: "1px solid #1B5E20",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontSize: "12px",
+                        }}
+                    >
+                        📐 Export Building Coordinates
+                    </button>
                 </div>
 
                 {showHeightInput && (
@@ -964,7 +1150,7 @@ export default function BuildingScene({
                         {siteCoordinates.buildings && siteCoordinates.buildings.length > 0 && (
                             <div style={{ marginBottom: "15px" }}>
                                 <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#333" }}>
-                                    🏢 Building Grid Points
+                                    🏢 Building Grid Points (Cumulative Z Heights)
                                 </h4>
                                 <div style={{ fontSize: "11px", marginBottom: "8px", color: "#666" }}>
                                     {siteCoordinates.buildings.length} buildings inside site boundary
@@ -974,12 +1160,13 @@ export default function BuildingScene({
                                     <div
                                         key={bIndex}
                                         style={{
-                                            backgroundColor: "#f5f5f5",
+                                            backgroundColor: building.isFloor ? "#f0f8ff" : "#f5f5f5",
                                             padding: "8px",
                                             borderRadius: "4px",
                                             fontFamily: "monospace",
                                             fontSize: "11px",
-                                            marginBottom: "10px"
+                                            marginBottom: "10px",
+                                            border: building.isFloor ? "1px solid #87CEEB" : "none"
                                         }}
                                     >
                                         <div style={{
@@ -988,12 +1175,28 @@ export default function BuildingScene({
                                             borderBottom: "1px solid #ddd",
                                             paddingBottom: "3px"
                                         }}>
-                                            Building {bIndex + 1}
-                                            {building.isFloor ? ` (Floor ${building.floorLevel})` : ''}
-                                            - Height: {building.height.toFixed(2)}
+                                            {building.isFloor ? 
+                                                `Floor ${building.floorLevel} (Base: ${building.baseBuilding})` : 
+                                                `Building ${building.id}`
+                                            }
+                                            - Floor Height: {building.height.toFixed(2)}
                                         </div>
+                                        
+                                        {/* Show Z position information */}
+                                        <div style={{ 
+                                            fontSize: "10px", 
+                                            color: "#0066cc", 
+                                            marginBottom: "5px",
+                                            fontWeight: "bold"
+                                        }}>
+                                            Z Range: {building.zPosition.base.toFixed(2)} → {building.zPosition.top.toFixed(2)} 
+                                            (Total Stack Height: {building.zPosition.totalHeight.toFixed(2)})
+                                        </div>
+
                                         {building.corners.map((point: any, pIndex: number) => (
-                                            <div key={pIndex}>
+                                            <div key={pIndex} style={{
+                                                color: point.position === 'base' ? '#666' : '#000'
+                                            }}>
                                                 Corner {point.index} ({point.position}):
                                                 ({point.x.toFixed(2)}, {point.y.toFixed(2)}, {point.z.toFixed(2)})
                                             </div>
@@ -1049,6 +1252,126 @@ export default function BuildingScene({
                                 }}
                             >
                                 📊 Download CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showSiteMeasurements && siteMeasurements && (
+                <div
+                    style={{
+                        position: "absolute",
+                        zIndex: 25,
+                        top: "120px",
+                        left: "20px",
+                        width: "400px",
+                        maxHeight: "70vh",
+                        backgroundColor: "white",
+                        border: "2px solid #9C27B0",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                        overflow: "auto",
+                    }}
+                >
+                    <div style={{
+                        padding: "10px",
+                        backgroundColor: "#9C27B0",
+                        color: "white",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                    }}>
+                        <h3 style={{ margin: 0, fontSize: "14px" }}>📏 Site Measurements</h3>
+                        <button
+                            onClick={() => setShowSiteMeasurements(false)}
+                            style={{
+                                background: "none",
+                                border: "none",
+                                color: "white",
+                                fontSize: "16px",
+                                cursor: "pointer"
+                            }}
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    <div style={{ padding: "15px" }}>
+                        {/* Summary Information */}
+                        <div style={{ marginBottom: "15px" }}>
+                            <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#333" }}>
+                                📊 Site Summary
+                            </h4>
+                            <div style={{
+                                backgroundColor: "#f8f4ff",
+                                padding: "8px",
+                                borderRadius: "4px",
+                                fontSize: "11px"
+                            }}>
+                                <div><strong>Total Perimeter:</strong> {siteMeasurements.totalPerimeter.toFixed(2)} meters</div>
+                                <div><strong>Site Area:</strong> {siteMeasurements.area.toFixed(2)} square meters</div>
+                                <div><strong>Number of Sides:</strong> {siteMeasurements.numberOfSides}</div>
+                            </div>
+                        </div>
+
+                        {/* Individual Side Measurements */}
+                        <div style={{ marginBottom: "15px" }}>
+                            <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#333" }}>
+                                📐 Side Measurements
+                            </h4>
+                            <div style={{
+                                backgroundColor: "#f5f5f5",
+                                padding: "8px",
+                                borderRadius: "4px",
+                                fontFamily: "monospace",
+                                fontSize: "11px",
+                                maxHeight: "200px",
+                                overflowY: "auto"
+                            }}>
+                                {siteMeasurements.sides.map((side: any, index: number) => (
+                                    <div key={index} style={{ 
+                                        marginBottom: "6px", 
+                                        paddingBottom: "6px", 
+                                        borderBottom: index < siteMeasurements.sides.length - 1 ? "1px solid #ddd" : "none" 
+                                    }}>
+                                        <div><strong>Side {index + 1}:</strong> {side.length.toFixed(2)} meters</div>
+                                        <div style={{ fontSize: "10px", color: "#666" }}>
+                                            From Point {side.start} to Point {side.end}
+                                        </div>
+                                        <div style={{ fontSize: "10px", color: "#666" }}>
+                                            ({side.startPoint[0].toFixed(2)}, {side.startPoint[1].toFixed(2)}) → 
+                                            ({side.endPoint[0].toFixed(2)}, {side.endPoint[1].toFixed(2)})
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Export Button for Measurements */}
+                        <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "15px" }}>
+                            <button
+                                onClick={() => {
+                                    const dataStr = JSON.stringify(siteMeasurements, null, 2);
+                                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                                    const url = URL.createObjectURL(dataBlob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = `site_measurements_${new Date().toISOString().split('T')[0]}.json`;
+                                    link.click();
+                                    URL.revokeObjectURL(url);
+                                }}
+                                style={{
+                                    padding: "6px 12px",
+                                    backgroundColor: "#9C27B0",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    fontSize: "11px"
+                                }}
+                            >
+                                📄 Download Measurements
                             </button>
                         </div>
                     </div>

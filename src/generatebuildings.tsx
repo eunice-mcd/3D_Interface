@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BuildingScene from "./BuildingScene";
 import * as turf from "@turf/turf";
 
@@ -135,24 +135,24 @@ function latlonToWebMercator(lon: number, lat: number): [number, number] {
 export default function GenerateBuildings() {
   const polygon: [number, number][] = [
         [
-            77.61935546588387,
-            12.998297887825188
+            77.60811946037832,
+            12.985979516439556
         ],
         [
-            77.61974556489773,
-            12.998546416852264
+            77.60829652602337,
+            12.986230849997597
         ],
         [
-            77.61976723711605,
-            12.998125704120739
+            77.60856979266505,
+            12.986025707528569
         ],
         [
-            77.6193921419104,
-            12.998028241621626
+            77.60843176514815,
+            12.985968647997993
         ],
         [
-            77.61935546588387,
-            12.998297887825188
+            77.60811946037832,
+            12.985979516439556
         ]
     ];
 
@@ -169,21 +169,17 @@ export default function GenerateBuildings() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    handleFetch()
+  },[])
+
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
-      <button
-        onClick={handleFetch}
-        disabled={loading}
-        style={{
-          position: "absolute",
-          zIndex: 10,
-          top: 20,
-          left: 20,
-          padding: "10px 20px",
-        }}
-      >
-        {loading ? "Fetching..." : "Fetch OSM Buildings"}
-      </button>
+      {loading && (
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: "24px" }}>
+          Loading buildings...      
+        </div>
+      )}
       {sceneData && (
         <BuildingScene buildings={sceneData.polygons} roads={sceneData.roads} />
       )}
