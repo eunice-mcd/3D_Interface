@@ -625,7 +625,10 @@ export default function BuildingScene({
                             setMoveMode(false);
                         }}
                     >
-                        🖱️ Select
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M2 2l4 8 2-4 4-2-10-2z"/>
+                        </svg>
+                        Select
                     </button>
 
                     <button
@@ -646,7 +649,11 @@ export default function BuildingScene({
                             setActiveTool(moveMode ? 'select' : 'move');
                         }}
                     >
-                        🏃 Move
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M8 2v12M2 8h12"/>
+                            <path d="M5 5l3-3 3 3M5 11l3 3 3-3"/>
+                        </svg>
+                        Move
                     </button>
 
                     <button
@@ -666,7 +673,11 @@ export default function BuildingScene({
                             setMoveMode(false);
                         }}
                     >
-                        🖐️ Pan
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M8 2v4M8 10v4M2 8h4M10 8h4"/>
+                            <circle cx="8" cy="8" r="2"/>
+                        </svg>
+                        Pan
                     </button>
 
                     <button
@@ -683,7 +694,10 @@ export default function BuildingScene({
                         }}
                         onClick={() => setActiveTool('rectangle')}
                     >
-                        ⬜ Rectangle
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <rect x="3" y="4" width="10" height="8"/>
+                        </svg>
+                        Rectangle
                     </button>
 
                     <button
@@ -700,7 +714,10 @@ export default function BuildingScene({
                         }}
                         onClick={() => setActiveTool('circle')}
                     >
-                        ⭕ Circle
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="8" cy="8" r="5"/>
+                        </svg>
+                        Circle
                     </button>
 
                     <button
@@ -717,7 +734,10 @@ export default function BuildingScene({
                         }}
                         onClick={() => setActiveTool('polygon')}
                     >
-                        🔷 Polygon
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M8 3l3 5-3 5-3-5z"/>
+                        </svg>
+                        Polygon
                     </button>
 
                     <button
@@ -734,7 +754,11 @@ export default function BuildingScene({
                         }}
                         onClick={() => setActiveTool('pushpull')}
                     >
-                        📏 Push/Pull
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M4 7h8M8 3v10"/>
+                            <path d="M5 4l3-1 3 1M5 12l3 1 3-1"/>
+                        </svg>
+                        Push/Pull
                     </button>
 
                     <button
@@ -751,7 +775,12 @@ export default function BuildingScene({
                         }}
                         onClick={() => setActiveTool('extrude')}
                     >
-                        🔼 Extrude
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M3 11h10v2H3z"/>
+                            <path d="M8 11V3"/>
+                            <path d="M5 6l3-3 3 3"/>
+                        </svg>
+                        Extrude
                     </button>
 
                     <button
@@ -775,7 +804,11 @@ export default function BuildingScene({
                             }
                         }}
                     >
-                        📐 Height Input
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M8 2v12M2 8h12"/>
+                            <text x="8" y="12" fontSize="6" textAnchor="middle" fill="currentColor">H</text>
+                        </svg>
+                        Height Input
                     </button>
 
                     <button
@@ -799,16 +832,21 @@ export default function BuildingScene({
                             }
                         }}
                     >
-                        🏢 Create Floors
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <rect x="2" y="11" width="12" height="2"/>
+                            <rect x="2" y="8" width="12" height="2"/>
+                            <rect x="2" y="5" width="12" height="2"/>
+                            <rect x="2" y="2" width="12" height="2"/>
+                        </svg>
+                        Create Floors
                     </button>
 
-                    {/* Keep Show Coordinates Button */}
                     <button
                         style={{
                             padding: "8px 12px",
-                            backgroundColor: "#4CAF50",
-                            color: "white",
-                            border: "1px solid #45a049",
+                            backgroundColor: "#f9f9f9",
+                            color: "black",
+                            border: "1px solid #ddd",
                             borderRadius: "4px",
                             cursor: "pointer",
                             display: "flex",
@@ -818,34 +856,21 @@ export default function BuildingScene({
                         }}
                         onClick={calculateSiteCoordinates}
                     >
-                        📊 Show Coordinates
-                    </button>
-
-                    <button
-                        onClick={getMainSiteGridPoints}
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: "#FF9800",
-                            color: "white",
-                            border: "1px solid #F57C00",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                    >
-                        Get Site Grid Points
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="8" cy="8" r="1"/>
+                            <path d="M8 1v2M8 13v2M1 8h2M13 8h2"/>
+                            <path d="M3.5 3.5l1.5 1.5M11.5 11.5l1.5 1.5M3.5 12.5l1.5-1.5M11.5 4.5l1.5-1.5"/>
+                        </svg>
+                        Show Coordinates
                     </button>
 
                     <button
                         onClick={getSiteSideLengthsInMeters}
                         style={{
                             padding: "8px 12px",
-                            backgroundColor: "#9C27B0",
-                            color: "white",
-                            border: "1px solid #7B1FA2",
+                            backgroundColor: "#f9f9f9",
+                            color: "black",
+                            border: "1px solid #ddd",
                             borderRadius: "4px",
                             cursor: "pointer",
                             display: "flex",
@@ -854,14 +879,20 @@ export default function BuildingScene({
                             fontSize: "12px",
                         }}
                     >
-                        📏 Site Measurements
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M2 2h12v12H2z"/>
+                            <path d="M2 6h12M6 2v12"/>
+                            <circle cx="4" cy="4" r="0.5"/>
+                            <circle cx="12" cy="4" r="0.5"/>
+                        </svg>
+                        Site Measurements
                     </button>
 
                     <button
                         style={{
                             padding: "8px 12px",
-                            backgroundColor: is2DView ? "#4CAF50" : "#f9f9f9",
-                            color: is2DView ? "white" : "black",
+                            backgroundColor: is2DView ? "#e0e0e0" : "#f9f9f9",
+                            color: "black",
                             border: "1px solid #ddd",
                             borderRadius: "4px",
                             cursor: "pointer",
@@ -874,13 +905,11 @@ export default function BuildingScene({
                             setIs2DView(!is2DView);
                             if (orbitRef.current) {
                                 if (!is2DView) {
-
                                     orbitRef.current.object.position.set(0, 0, 800);
                                     orbitRef.current.object.lookAt(0, 0, 0);
                                     orbitRef.current.enableRotate = false;
                                     orbitRef.current.target.set(0, 0, 0);
                                 } else {
-
                                     orbitRef.current.object.position.set(200, 300, 400);
                                     orbitRef.current.object.lookAt(0, 0, 0);
                                     orbitRef.current.enableRotate = true;
@@ -889,16 +918,32 @@ export default function BuildingScene({
                             }
                         }}
                     >
-                        🗺️ {is2DView ? '3D View' : '2D View'}
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            {is2DView ? (
+                                // 3D View icon (cube)
+                                <g>
+                                    <path d="M2 6l6-4 6 4v7l-6 4-6-4V6z"/>
+                                    <path d="M2 6l6 4 6-4"/>
+                                    <path d="M8 10v6"/>
+                                </g>
+                            ) : (
+                                // 2D View icon (flat square with grid)
+                                <g>
+                                    <rect x="2" y="2" width="12" height="12"/>
+                                    <path d="M2 7h12M7 2v12"/>
+                                </g>
+                            )}
+                        </svg>
+                        {is2DView ? '3D View' : '2D View'}
                     </button>
 
                     <button
                         onClick={exportBuildingCoordinates}
                         style={{
                             padding: "8px 12px",
-                            backgroundColor: "#2E7D32",
-                            color: "white",
-                            border: "1px solid #1B5E20",
+                            backgroundColor: "#f9f9f9",
+                            color: "black",
+                            border: "1px solid #ddd",
                             borderRadius: "4px",
                             cursor: "pointer",
                             display: "flex",
@@ -907,7 +952,12 @@ export default function BuildingScene({
                             fontSize: "12px",
                         }}
                     >
-                        📐 Export Building Coordinates
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M14 10v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2"/>
+                            <path d="M8 2v8"/>
+                            <path d="M5 7l3 3 3-3"/>
+                        </svg>
+                        Export Building Coordinates
                     </button>
                 </div>
 
@@ -1092,7 +1142,7 @@ export default function BuildingScene({
                         width: "400px",
                         maxHeight: "70vh",
                         backgroundColor: "white",
-                        border: "2px solid #4CAF50",
+                        border: "2px solid #ccc",
                         borderRadius: "8px",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                         overflow: "auto",
@@ -1100,7 +1150,7 @@ export default function BuildingScene({
                 >
                     <div style={{
                         padding: "10px",
-                        backgroundColor: "#4CAF50",
+                        backgroundColor: "#666",
                         color: "white",
                         display: "flex",
                         justifyContent: "space-between",
@@ -1268,7 +1318,7 @@ export default function BuildingScene({
                         width: "400px",
                         maxHeight: "70vh",
                         backgroundColor: "white",
-                        border: "2px solid #9C27B0",
+                        border: "2px solid #ccc",
                         borderRadius: "8px",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                         overflow: "auto",
@@ -1276,7 +1326,7 @@ export default function BuildingScene({
                 >
                     <div style={{
                         padding: "10px",
-                        backgroundColor: "#9C27B0",
+                        backgroundColor: "#666",
                         color: "white",
                         display: "flex",
                         justifyContent: "space-between",
