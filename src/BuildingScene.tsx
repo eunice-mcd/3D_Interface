@@ -590,564 +590,707 @@ export default function BuildingScene({
 
     return (
         <>
+            {/* Header with NASH ZERO logo - Adjusted for smaller sidebar */}
+            <div
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 70, // Changed from 100 to 70
+                    width: "calc(100% - 70px)", // Adjusted width calculation
+                    height: "60px",
+                    backgroundColor: "white",
+                    borderBottom: "1px solid #ddd",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    zIndex: 30,
+                    display: "flex",
+                    alignItems: "center",
+                    paddingLeft: "20px",
+                    paddingRight: "20px",
+                    boxSizing: "border-box"
+                }}
+            >
+                <div
+                    style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "30px",
+                        color: "#549acb",
+                        fontWeight: "600",
+                        letterSpacing: "-0.5px"
+                    }}
+                >
+                    NASH ZERO
+                </div>
+            </div>
+
+            {/* Left Sidebar Tab - Reduced width */}
+            <div
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "70px", // Reduced from 100px to 70px
+                    height: "100vh",
+                    backgroundColor: "#549acb",
+                    zIndex: 35,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    paddingTop: "80px", // Start below header
+                    boxShadow: "2px 0 8px rgba(0,0,0,0.1)"
+                }}
+            >
+                {/* Home Icon - Adjusted for smaller sidebar */}
+                <div
+                    style={{
+                        padding: "8px", // Reduced padding
+                        marginBottom: "20px",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                    }}
+                >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                </div>
+
+                {/* You can add more navigation icons here if needed */}
+            </div>
+
+            {/* Adjust the toolbar position to account for smaller sidebar */}
             <div
                 style={{
                     position: "absolute",
                     zIndex: 20,
-                    top: 20,
-                    left: 20,
-                    right: 20,
+                    top: 80,
+                    left: 90, // Changed from 120 to 90 (70px sidebar + 20px margin)
                     backgroundColor: "white",
                     border: "1px solid #ccc",
                     borderRadius: "8px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    padding: "10px",
+                    padding: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    width: "48px"
                 }}
             >
-                <div style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "8px" }}>
-                    Tools
-                </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'select' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => {
-                            setActiveTool('select');
-                            setMoveMode(false);
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M2 2l4 8 2-4 4-2-10-2z"/>
-                        </svg>
-                        Select
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: moveMode ? "#00ccff" : "#f9f9f9",
-                            color: moveMode ? "white" : "black",
-                            border: moveMode ? "2px solid #0088cc" : "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => {
-                            setMoveMode(!moveMode);
-                            setActiveTool(moveMode ? 'select' : 'move');
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M8 2v12M2 8h12"/>
-                            <path d="M5 5l3-3 3 3M5 11l3 3 3-3"/>
-                        </svg>
-                        Move
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'pan' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => {
-                            setActiveTool('pan');
-                            setMoveMode(false);
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M8 2v4M8 10v4M2 8h4M10 8h4"/>
-                            <circle cx="8" cy="8" r="2"/>
-                        </svg>
-                        Pan
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'rectangle' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => setActiveTool('rectangle')}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <rect x="3" y="4" width="10" height="8"/>
-                        </svg>
-                        Rectangle
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'circle' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => setActiveTool('circle')}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <circle cx="8" cy="8" r="5"/>
-                        </svg>
-                        Circle
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'polygon' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => setActiveTool('polygon')}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M8 3l3 5-3 5-3-5z"/>
-                        </svg>
-                        Polygon
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'pushpull' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => setActiveTool('pushpull')}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M4 7h8M8 3v10"/>
-                            <path d="M5 4l3-1 3 1M5 12l3 1 3-1"/>
-                        </svg>
-                        Push/Pull
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: activeTool === 'extrude' ? "#e0e0e0" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => setActiveTool('extrude')}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M3 11h10v2H3z"/>
-                            <path d="M8 11V3"/>
-                            <path d="M5 6l3-3 3 3"/>
-                        </svg>
-                        Extrude
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: showHeightInput ? "#ffcc00" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => {
-                            if (selected !== null && buildingList[selected]?.height <= 0.1) {
-                                setSelectedForExtrude(selected);
-                                setShowHeightInput(true);
-                            } else {
-                                alert('Please select a 2D shape to extrude');
-                            }
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M8 2v12M2 8h12"/>
-                            <text x="8" y="12" fontSize="6" textAnchor="middle" fill="currentColor">H</text>
-                        </svg>
-                        Height Input
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: showFloorInput ? "#ffaa00" : "#f9f9f9",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => {
-                            if (selected !== null && buildingList[selected]?.height > 0.1) {
-                                setSelectedForFloors(selected);
-                                setShowFloorInput(true);
-                            } else {
-                                alert('Please select a 3D building to add floors');
-                            }
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <rect x="2" y="11" width="12" height="2"/>
-                            <rect x="2" y="8" width="12" height="2"/>
-                            <rect x="2" y="5" width="12" height="2"/>
-                            <rect x="2" y="2" width="12" height="2"/>
-                        </svg>
-                        Create Floors
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: "#f9f9f9",
-                            color: "black",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={calculateSiteCoordinates}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <circle cx="8" cy="8" r="1"/>
-                            <path d="M8 1v2M8 13v2M1 8h2M13 8h2"/>
-                            <path d="M3.5 3.5l1.5 1.5M11.5 11.5l1.5 1.5M3.5 12.5l1.5-1.5M11.5 4.5l1.5-1.5"/>
-                        </svg>
-                        Show Coordinates
-                    </button>
-
-                    <button
-                        onClick={getSiteSideLengthsInMeters}
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: "#f9f9f9",
-                            color: "black",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M2 2h12v12H2z"/>
-                            <path d="M2 6h12M6 2v12"/>
-                            <circle cx="4" cy="4" r="0.5"/>
-                            <circle cx="12" cy="4" r="0.5"/>
-                        </svg>
-                        Site Measurements
-                    </button>
-
-                    <button
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: is2DView ? "#e0e0e0" : "#f9f9f9",
-                            color: "black",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                        onClick={() => {
-                            setIs2DView(!is2DView);
-                            if (orbitRef.current) {
-                                if (!is2DView) {
-                                    orbitRef.current.object.position.set(0, 0, 800);
-                                    orbitRef.current.object.lookAt(0, 0, 0);
-                                    orbitRef.current.enableRotate = false;
-                                    orbitRef.current.target.set(0, 0, 0);
-                                } else {
-                                    orbitRef.current.object.position.set(200, 300, 400);
-                                    orbitRef.current.object.lookAt(0, 0, 0);
-                                    orbitRef.current.enableRotate = true;
-                                }
-                                orbitRef.current.update();
-                            }
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            {is2DView ? (
-                                // 3D View icon (cube)
-                                <g>
-                                    <path d="M2 6l6-4 6 4v7l-6 4-6-4V6z"/>
-                                    <path d="M2 6l6 4 6-4"/>
-                                    <path d="M8 10v6"/>
-                                </g>
-                            ) : (
-                                // 2D View icon (flat square with grid)
-                                <g>
-                                    <rect x="2" y="2" width="12" height="12"/>
-                                    <path d="M2 7h12M7 2v12"/>
-                                </g>
-                            )}
-                        </svg>
-                        {is2DView ? '3D View' : '2D View'}
-                    </button>
-
-                    <button
-                        onClick={exportBuildingCoordinates}
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: "#f9f9f9",
-                            color: "black",
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "12px",
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                            <path d="M14 10v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2"/>
-                            <path d="M8 2v8"/>
-                            <path d="M5 7l3 3 3-3"/>
-                        </svg>
-                        Export Building Coordinates
-                    </button>
-                </div>
-
-                {showHeightInput && (
-                    <div style={{
-                        marginTop: "10px",
-                        padding: "10px",
-                        backgroundColor: "#f0f0f0",
+                {/* Select Tool */}
+                <button
+                    title="Select"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'select' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
                         borderRadius: "4px",
-                        border: "1px solid #ddd"
-                    }}>
-                        <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "8px" }}>
-                            Enter Extrusion Height:
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => {
+                        setActiveTool('select');
+                        setMoveMode(false);
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M2 2l4 8 2-4 4-2-10-2z"/>
+                    </svg>
+                </button>
+
+                {/* Move Tool */}
+                <button
+                    title="Move"
+                    style={{
+                        padding: "0",
+                        backgroundColor: moveMode ? "#00ccff" : "#f9f9f9",
+                        color: moveMode ? "white" : "black",
+                        border: moveMode ? "2px solid #0088cc" : "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => {
+                        setMoveMode(!moveMode);
+                        setActiveTool(moveMode ? 'select' : 'move');
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M8 2v12"/>
+                        <path d="M2 8h12"/>
+                        <path d="M4 4l4 4 4-4"/>
+                        <path d="M4 12l4-4 4 4"/>
+                        <path d="M4 6l4-2 4 2"/>
+                        <path d="M4 10l4 2 4-2"/>
+                    </svg>
+                </button>
+
+                {/* Pan Tool - Updated with hand symbol */}
+                <button
+                    title="Pan"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'pan' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => {
+                        setActiveTool('pan');
+                        setMoveMode(false);
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M6 2v6M8 3v5M10 4v4M12 5v3"/>
+                        <path d="M6 8c0 1.5 1 3 3 3s3-1.5 3-3"/>
+                        <path d="M4 7c-1 0-2 1-2 2s1 2 2 2"/>
+                    </svg>
+                </button>
+
+                {/* Rectangle Tool */}
+                <button
+                    title="Rectangle"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'rectangle' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => setActiveTool('rectangle')}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="4" width="10" height="8"/>
+                    </svg>
+                </button>
+
+                {/* Circle Tool */}
+                <button
+                    title="Circle"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'circle' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => setActiveTool('circle')}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="8" cy="8" r="5"/>
+                    </svg>
+                </button>
+
+                {/* Polygon Tool - Updated with pencil and polygon symbol */}
+                <button
+                    title="Polygon"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'polygon' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => setActiveTool('polygon')}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M2 13l3-11 4 2 3-2 2 4-3 2 1 3-4 1-3-1z"/>
+                        <circle cx="13" cy="3" r="1" fill="currentColor"/>
+                        <path d="M12 2l1 1"/>
+                    </svg>
+                </button>
+
+                {/* Push/Pull Tool - Updated with vertical and horizontal arrows */}
+                <button
+                    title="Push/Pull"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'pushpull' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => setActiveTool('pushpull')}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        {/* Vertical arrows (up/down) */}
+                        <path d="M5 2v12"/>
+                        <path d="M2 5l3-3 3 3"/>
+                        <path d="M2 11l3 3 3-3"/>
+                        {/* Horizontal arrows (left/right) */}
+                        <path d="M9 5h5"/>
+                        <path d="M11 3l3 2-3 2"/>
+                        <path d="M9 11h5"/>
+                        <path d="M11 9l3 2-3 2"/>
+                    </svg>
+                </button>
+
+                {/* Extrude Tool */}
+                <button
+                    title="Extrude"
+                    style={{
+                        padding: "0",
+                        backgroundColor: activeTool === 'extrude' ? "#e0e0e0" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => setActiveTool('extrude')}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M3 11h10v2H3z"/>
+                        <path d="M8 11V3"/>
+                        <path d="M5 6l3-3 3 3"/>
+                    </svg>
+                </button>
+
+                {/* Divider */}
+                <div style={{
+                    height: "1px",
+                    backgroundColor: "#ddd",
+                    margin: "4px 0"
+                }}></div>
+
+                {/* Height Input Tool */}
+                <button
+                    title="Height Input"
+                    style={{
+                        padding: "0",
+                        backgroundColor: showHeightInput ? "#ffcc00" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => {
+                        if (selected !== null && buildingList[selected]?.height <= 0.1) {
+                            setSelectedForExtrude(selected);
+                            setShowHeightInput(true);
+                        } else {
+                            alert('Please select a 2D shape to extrude');
+                        }
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M8 2v12M2 8h12"/>
+                        <text x="8" y="12" fontSize="6" textAnchor="middle" fill="currentColor">H</text>
+                    </svg>
+                </button>
+
+                {/* Create Floors Tool - Updated with clear height/floor levels */}
+                <button
+                    title="Create Floors"
+                    style={{
+                        padding: "0",
+                        backgroundColor: showFloorInput ? "#ffaa00" : "#f9f9f9",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => {
+                        if (selected !== null && buildingList[selected]?.height > 0.1) {
+                            setSelectedForFloors(selected);
+                            setShowFloorInput(true);
+                        } else {
+                            alert('Please select a 3D building to add floors');
+                        }
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        {/* Building outline */}
+                        <rect x="3" y="2" width="10" height="12" fill="none"/>
+                        {/* Floor divisions with height indicators */}
+                        <path d="M3 5h10M3 8h10M3 11h10"/>
+                        {/* Height measurement lines */}
+                        <path d="M1 5h1M1 8h1M1 11h1M1 14h1"/>
+                        <path d="M1.5 5v3M1.5 8v3M1.5 11v3"/>
+                        {/* Small height labels */}
+                        <circle cx="1.5" cy="6.5" r="0.3" fill="currentColor"/>
+                        <circle cx="1.5" cy="9.5" r="0.3" fill="currentColor"/>
+                        <circle cx="1.5" cy="12.5" r="0.3" fill="currentColor"/>
+                    </svg>
+                </button>
+
+                {/* Divider */}
+                <div style={{
+                    height: "1px",
+                    backgroundColor: "#ddd",
+                    margin: "4px 0"
+                }}></div>
+
+                {/* Show Coordinates Tool */}
+                <button
+                    title="Show Coordinates"
+                    style={{
+                        padding: "0",
+                        backgroundColor: "#f9f9f9",
+                        color: "black",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={calculateSiteCoordinates}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="8" cy="8" r="1"/>
+                        <path d="M8 1v2M8 13v2M1 8h2M13 8h2"/>
+                        <path d="M3.5 3.5l1.5 1.5M11.5 11.5l1.5 1.5M3.5 12.5l1.5-1.5M11.5 4.5l1.5-1.5"/>
+                    </svg>
+                </button>
+
+                {/* Site Measurements Tool */}
+                <button
+                    title="Site Measurements"
+                    onClick={getSiteSideLengthsInMeters}
+                    style={{
+                        padding: "0",
+                        backgroundColor: "#f9f9f9",
+                        color: "black",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M2 2h12v12H2z"/>
+                        <path d="M2 6h12M6 2v12"/>
+                        <circle cx="4" cy="4" r="0.5"/>
+                        <circle cx="12" cy="4" r="0.5"/>
+                    </svg>
+                </button>
+
+                {/* 2D/3D View Toggle */}
+                <button
+                    title={is2DView ? '3D View' : '2D View'}
+                    style={{
+                        padding: "0",
+                        backgroundColor: is2DView ? "#e0e0e0" : "#f9f9f9",
+                        color: "black",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                    onClick={() => {
+                        setIs2DView(!is2DView);
+                        if (orbitRef.current) {
+                            if (!is2DView) {
+                                orbitRef.current.object.position.set(0, 0, 800);
+                                orbitRef.current.object.lookAt(0, 0, 0);
+                                orbitRef.current.enableRotate = false;
+                                orbitRef.current.target.set(0, 0, 0);
+                            } else {
+                                orbitRef.current.object.position.set(200, 300, 400);
+                                orbitRef.current.object.lookAt(0, 0, 0);
+                                orbitRef.current.enableRotate = true;
+                            }
+                            orbitRef.current.update();
+                        }
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        {is2DView ? (
+                            // 3D View icon (cube)
+                            <g>
+                                <path d="M2 6l6-4 6 4v7l-6 4-6-4V6z"/>
+                                <path d="M2 6l6 4 6-4"/>
+                                <path d="M8 10v6"/>
+                            </g>
+                        ) : (
+                            // 2D View icon (flat square with grid)
+                            <g>
+                                <rect x="2" y="2" width="12" height="12"/>
+                                <path d="M2 7h12M7 2v12"/>
+                            </g>
+                        )}
+                    </svg>
+                </button>
+
+                {/* Export Building Coordinates */}
+                <button
+                    title="Export Building Coordinates"
+                    onClick={exportBuildingCoordinates}
+                    style={{
+                        padding: "0",
+                        backgroundColor: "#f9f9f9",
+                        color: "black",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "32px",
+                        height: "32px",
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M14 10v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2"/>
+                        <path d="M8 2v8"/>
+                        <path d="M5 7l3 3 3-3"/>
+                    </svg>
+                </button>
+            </div>
+
+            {/* Move Height Input to right side when shown */}
+            {showHeightInput && (
+                <div style={{
+                    position: "absolute",
+                    zIndex: 25,
+                    top: "80px", // Account for header
+                    right: "20px",
+                    padding: "10px",
+                    backgroundColor: "#f0f0f0",
+                    borderRadius: "4px",
+                    border: "1px solid #ddd",
+                    width: "250px"
+                }}>
+                    <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "8px" }}>
+                        Enter Extrusion Height:
+                    </div>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <input
+                            type="number"
+                            value={extrudeHeight}
+                            onChange={(e) => setExtrudeHeight(e.target.value)}
+                            placeholder="Enter height"
+                            style={{
+                                padding: "4px 8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "4px",
+                                width: "80px",
+                                fontSize: "12px"
+                            }}
+                            min="0.1"
+                            step="0.1"
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                    handlePreciseExtrude();
+                                }
+                            }}
+                        />
+                        <span style={{ fontSize: "12px", color: "#666" }}>units</span>
+                        <button
+                            style={{
+                                padding: "4px 12px",
+                                backgroundColor: "#00cc00",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "12px"
+                            }}
+                            onClick={handlePreciseExtrude}
+                        >
+                            Apply
+                        </button>
+                        <button
+                            style={{
+                                padding: "4px 12px",
+                                backgroundColor: "#ff4444",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "12px"
+                            }}
+                            onClick={() => {
+                                setShowHeightInput(false);
+                                setSelectedForExtrude(null);
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                    {selectedForExtrude !== null && (
+                        <div style={{ fontSize: "11px", color: "#666", marginTop: "4px" }}>
+                            Selected building: {selectedForExtrude} (Current height: {buildingList[selectedForExtrude]?.height.toFixed(1)})
                         </div>
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    )}
+                </div>
+            )}
+
+            {/* Move Floor Input to right side when shown */}
+            {showFloorInput && (
+                <div style={{
+                    position: "absolute",
+                    zIndex: 25,
+                    top: showHeightInput ? "200px" : "80px",
+                    right: "20px",
+                    padding: "10px",
+                    backgroundColor: "#fff3e0",
+                    borderRadius: "4px",
+                    border: "1px solid #ffaa00",
+                    width: "280px"
+                }}>
+                    <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "8px" }}>
+                        Create Floors:
+                    </div>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <label style={{ fontSize: "11px" }}>Floors:</label>
                             <input
                                 type="number"
-                                value={extrudeHeight}
-                                onChange={(e) => setExtrudeHeight(e.target.value)}
-                                placeholder="Enter height"
+                                value={numberOfFloors}
+                                onChange={(e) => setNumberOfFloors(e.target.value)}
+                                placeholder="Number"
                                 style={{
                                     padding: "4px 8px",
                                     border: "1px solid #ddd",
                                     borderRadius: "4px",
-                                    width: "80px",
+                                    width: "60px",
+                                    fontSize: "12px"
+                                }}
+                                min="1"
+                                max="20"
+                                step="1"
+                            />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <label style={{ fontSize: "11px" }}>Height:</label>
+                            <input
+                                type="number"
+                                value={floorHeight}
+                                onChange={(e) => setFloorHeight(e.target.value)}
+                                placeholder="Floor height"
+                                style={{
+                                    padding: "4px 8px",
+                                    border: "1px solid #ddd",
+                                    borderRadius: "4px",
+                                    width: "70px",
                                     fontSize: "12px"
                                 }}
                                 min="0.1"
                                 step="0.1"
                                 onKeyPress={(e) => {
                                     if (e.key === 'Enter') {
-                                        handlePreciseExtrude();
+                                        handleCreateFloors();
                                     }
                                 }}
                             />
-                            <span style={{ fontSize: "12px", color: "#666" }}>units</span>
-                            <button
-                                style={{
-                                    padding: "4px 12px",
-                                    backgroundColor: "#00cc00",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: "pointer",
-                                    fontSize: "12px"
-                                }}
-                                onClick={handlePreciseExtrude}
-                            >
-                                Apply
-                            </button>
-                            <button
-                                style={{
-                                    padding: "4px 12px",
-                                    backgroundColor: "#ff4444",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: "pointer",
-                                    fontSize: "12px"
-                                }}
-                                onClick={() => {
-                                    setShowHeightInput(false);
-                                    setSelectedForExtrude(null);
-                                }}
-                            >
-                                Cancel
-                            </button>
+                            <span style={{ fontSize: "11px", color: "#666" }}>units</span>
                         </div>
-                        {selectedForExtrude !== null && (
-                            <div style={{ fontSize: "11px", color: "#666", marginTop: "4px" }}>
-                                Selected building: {selectedForExtrude} (Current height: {buildingList[selectedForExtrude]?.height.toFixed(1)})
-                            </div>
-                        )}
+                        <button
+                            style={{
+                                padding: "4px 12px",
+                                backgroundColor: "#ff9900",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "12px"
+                            }}
+                            onClick={handleCreateFloors}
+                        >
+                            Create
+                        </button>
+                        <button
+                            style={{
+                                padding: "4px 12px",
+                                backgroundColor: "#ff4444",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "12px"
+                            }}
+                            onClick={() => {
+                                setShowFloorInput(false);
+                                setSelectedForFloors(null);
+                            }}
+                        >
+                            Cancel
+                        </button>
                     </div>
-                )}
-
-                {showFloorInput && (
-                    <div style={{
-                        marginTop: "10px",
-                        padding: "10px",
-                        backgroundColor: "#fff3e0",
-                        borderRadius: "4px",
-                        border: "1px solid #ffaa00"
-                    }}>
-                        <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "8px" }}>
-                            Create Floors:
+                    {selectedForFloors !== null && (
+                        <div style={{ fontSize: "11px", color: "#666", marginTop: "4px" }}>
+                            Base building: {selectedForFloors} (Height: {buildingList[selectedForFloors]?.height.toFixed(1)}) |
+                            Total floors will be: {numberOfFloors} × {floorHeight} = {(parseInt(numberOfFloors) * parseFloat(floorHeight)).toFixed(1)} units
                         </div>
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                <label style={{ fontSize: "11px" }}>Floors:</label>
-                                <input
-                                    type="number"
-                                    value={numberOfFloors}
-                                    onChange={(e) => setNumberOfFloors(e.target.value)}
-                                    placeholder="Number"
-                                    style={{
-                                        padding: "4px 8px",
-                                        border: "1px solid #ddd",
-                                        borderRadius: "4px",
-                                        width: "60px",
-                                        fontSize: "12px"
-                                    }}
-                                    min="1"
-                                    max="20"
-                                    step="1"
-                                />
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                <label style={{ fontSize: "11px" }}>Height:</label>
-                                <input
-                                    type="number"
-                                    value={floorHeight}
-                                    onChange={(e) => setFloorHeight(e.target.value)}
-                                    placeholder="Floor height"
-                                    style={{
-                                        padding: "4px 8px",
-                                        border: "1px solid #ddd",
-                                        borderRadius: "4px",
-                                        width: "70px",
-                                        fontSize: "12px"
-                                    }}
-                                    min="0.1"
-                                    step="0.1"
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleCreateFloors();
-                                        }
-                                    }}
-                                />
-                                <span style={{ fontSize: "11px", color: "#666" }}>units</span>
-                            </div>
-                            <button
-                                style={{
-                                    padding: "4px 12px",
-                                    backgroundColor: "#ff9900",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: "pointer",
-                                    fontSize: "12px"
-                                }}
-                                onClick={handleCreateFloors}
-                            >
-                                Create
-                            </button>
-                            <button
-                                style={{
-                                    padding: "4px 12px",
-                                    backgroundColor: "#ff4444",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: "pointer",
-                                    fontSize: "12px"
-                                }}
-                                onClick={() => {
-                                    setShowFloorInput(false);
-                                    setSelectedForFloors(null);
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                        {selectedForFloors !== null && (
-                            <div style={{ fontSize: "11px", color: "#666", marginTop: "4px" }}>
-                                Base building: {selectedForFloors} (Height: {buildingList[selectedForFloors]?.height.toFixed(1)}) |
-                                Total floors will be: {numberOfFloors} × {floorHeight} = {(parseInt(numberOfFloors) * parseFloat(floorHeight)).toFixed(1)} units
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-
+                    )}
+                </div>
+            )}
 
             {showCoordinates && siteCoordinates && (
-                <div
-                    style={{
-                        position: "absolute",
-                        zIndex: 25,
-                        top: "120px",
-                        right: "20px",
-                        width: "400px",
-                        maxHeight: "70vh",
-                        backgroundColor: "white",
-                        border: "2px solid #ccc",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                        overflow: "auto",
-                    }}
-                >
+                <div style={{
+                    position: "absolute",
+                    zIndex: 25,
+                    top: "180px",
+                    right: "20px",
+                    width: "400px",
+                    maxHeight: "70vh",
+                    backgroundColor: "white",
+                    border: "2px solid #ccc",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                    overflow: "auto",
+                }}>
                     <div style={{
                         padding: "10px",
                         backgroundColor: "#666",
@@ -1309,21 +1452,19 @@ export default function BuildingScene({
             )}
 
             {showSiteMeasurements && siteMeasurements && (
-                <div
-                    style={{
-                        position: "absolute",
-                        zIndex: 25,
-                        top: "120px",
-                        left: "20px",
-                        width: "400px",
-                        maxHeight: "70vh",
-                        backgroundColor: "white",
-                        border: "2px solid #ccc",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                        overflow: "auto",
-                    }}
-                >
+                <div style={{
+                    position: "absolute",
+                    zIndex: 25,
+                    top: "180px",
+                    left: "90px", // Changed from 120px to 90px (70px sidebar + 20px margin)
+                    width: "400px",
+                    maxHeight: "70vh",
+                    backgroundColor: "white",
+                    border: "2px solid #ccc",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                    overflow: "auto",
+                }}>
                     <div style={{
                         padding: "10px",
                         backgroundColor: "#666",
@@ -1428,10 +1569,17 @@ export default function BuildingScene({
                 </div>
             )}
 
+            {/* Update Canvas to account for sidebar */}
             <Canvas
                 camera={{ position: [0, 0, 500], fov: 50 }}
                 shadows
-                style={{ width: "100vw", height: "100vh", background: "#E8E8E8" }}
+                style={{ 
+                    width: "calc(100vw - 70px)", // Changed from 100px to 70px
+                    height: "calc(100vh - 60px)", // Reduce height by header
+                    marginTop: "60px", // Push down by header height
+                    marginLeft: "70px", // Changed from 100px to 70px
+                    background: "#E8E8E8" 
+                }}
             >
                 <CanvasContent
                     buildingList={buildingList}
